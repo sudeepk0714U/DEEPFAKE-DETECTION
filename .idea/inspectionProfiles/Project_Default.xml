@@ -1,0 +1,22 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="ultralytics" />
+          <option value="opencv-python" />
+          <option value="pyttsx3" />
+          <option value="speechrecognition" />
+          <option value="numpy" />
+          <option value="Pillow" />
+          <option value="pyaudio" />
+          <option value="edge-tts" />
+          <option value="pytesseract" />
+          <option value="streamlit" />
+          <option value="mediapipe" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

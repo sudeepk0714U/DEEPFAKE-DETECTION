@@ -1,0 +1,9 @@
+Flask
+Flask-SocketIO
+opencv-python
+mediapipe
+numpy
+tensorflow
+torch
+transformers
+librosa

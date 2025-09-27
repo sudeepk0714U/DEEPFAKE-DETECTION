@@ -1,0 +1,429 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>AI Proctoring System - Home</title>-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
+<!--    <style>-->
+<!--        :root {-->
+<!--            &#45;&#45;primary-color: #2563eb;-->
+<!--            &#45;&#45;secondary-color: #1e40af;-->
+<!--            &#45;&#45;accent-color: #3b82f6;-->
+<!--            &#45;&#45;success-color: #10b981;-->
+<!--            &#45;&#45;warning-color: #f59e0b;-->
+<!--            &#45;&#45;danger-color: #ef4444;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;-->
+<!--            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
+<!--            min-height: 100vh;-->
+<!--            margin: 0;-->
+<!--        }-->
+
+<!--        .hero-section {-->
+<!--            padding: 60px 0;-->
+<!--            color: white;-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .hero-title {-->
+<!--            font-size: 3.5rem;-->
+<!--            font-weight: 700;-->
+<!--            margin-bottom: 1rem;-->
+<!--            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);-->
+<!--        }-->
+
+<!--        .hero-subtitle {-->
+<!--            font-size: 1.5rem;-->
+<!--            margin-bottom: 2rem;-->
+<!--            opacity: 0.9;-->
+<!--        }-->
+
+<!--        .feature-card {-->
+<!--            background: rgba(255, 255, 255, 0.95);-->
+<!--            border-radius: 15px;-->
+<!--            padding: 2rem;-->
+<!--            margin: 1rem 0;-->
+<!--            box-shadow: 0 10px 30px rgba(0,0,0,0.1);-->
+<!--            transition: transform 0.3s ease, box-shadow 0.3s ease;-->
+<!--            border: none;-->
+<!--        }-->
+
+<!--        .feature-card:hover {-->
+<!--            transform: translateY(-5px);-->
+<!--            box-shadow: 0 15px 40px rgba(0,0,0,0.15);-->
+<!--        }-->
+
+<!--        .feature-icon {-->
+<!--            font-size: 3rem;-->
+<!--            color: var(&#45;&#45;primary-color);-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        .btn-primary-custom {-->
+<!--            background: var(&#45;&#45;primary-color);-->
+<!--            border: none;-->
+<!--            padding: 15px 40px;-->
+<!--            font-size: 1.1rem;-->
+<!--            font-weight: 600;-->
+<!--            border-radius: 50px;-->
+<!--            transition: all 0.3s ease;-->
+<!--        }-->
+
+<!--        .btn-primary-custom:hover {-->
+<!--            background: var(&#45;&#45;secondary-color);-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);-->
+<!--        }-->
+
+<!--        .stats-section {-->
+<!--            background: rgba(255, 255, 255, 0.1);-->
+<!--            padding: 40px 0;-->
+<!--            margin: 60px 0;-->
+<!--            border-radius: 20px;-->
+<!--            backdrop-filter: blur(10px);-->
+<!--        }-->
+
+<!--        .stat-item {-->
+<!--            text-align: center;-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .stat-number {-->
+<!--            font-size: 3rem;-->
+<!--            font-weight: 700;-->
+<!--            display: block;-->
+<!--        }-->
+
+<!--        .stat-label {-->
+<!--            font-size: 1.1rem;-->
+<!--            opacity: 0.8;-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .hero-title {-->
+<!--                font-size: 2.5rem;-->
+<!--            }-->
+<!--            .hero-subtitle {-->
+<!--                font-size: 1.2rem;-->
+<!--            }-->
+<!--            .feature-card {-->
+<!--                margin: 0.5rem 0;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--    &lt;!&ndash; Navigation &ndash;&gt;-->
+<!--    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(0,0,0,0.1);">-->
+<!--        <div class="container">-->
+<!--            <a class="navbar-brand fw-bold" href="/">-->
+<!--                <i class="fas fa-shield-alt me-2"></i>AI Proctor-->
+<!--            </a>-->
+<!--            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">-->
+<!--                <span class="navbar-toggler-icon"></span>-->
+<!--            </button>-->
+<!--            <div class="collapse navbar-collapse" id="navbarNav">-->
+<!--                <ul class="navbar-nav ms-auto">-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link active" href="/">Home</a>-->
+<!--                    </li>-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link" href="/assessment">Assessment</a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </nav>-->
+
+<!--    &lt;!&ndash; Hero Section &ndash;&gt;-->
+<!--    <section class="hero-section">-->
+<!--        <div class="container">-->
+<!--            <h1 class="hero-title">AI-Powered Proctoring</h1>-->
+<!--            <p class="hero-subtitle">Advanced real-time monitoring with artificial intelligence</p>-->
+<!--            <a href="/assessment" class="btn btn-primary-custom">-->
+<!--                <i class="fas fa-play me-2"></i>Start Assessment-->
+<!--            </a>-->
+<!--        </div>-->
+<!--    </section>-->
+
+<!--    &lt;!&ndash; Stats Section &ndash;&gt;-->
+<!--    <section class="stats-section">-->
+<!--        <div class="container">-->
+<!--            <div class="row">-->
+<!--                <div class="col-md-3 col-6">-->
+<!--                    <div class="stat-item">-->
+<!--                        <span class="stat-number">99.5%</span>-->
+<!--                        <span class="stat-label">Accuracy</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-3 col-6">-->
+<!--                    <div class="stat-item">-->
+<!--                        <span class="stat-number">Real-time</span>-->
+<!--                        <span class="stat-label">Detection</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-3 col-6">-->
+<!--                    <div class="stat-item">-->
+<!--                        <span class="stat-number">24/7</span>-->
+<!--                        <span class="stat-label">Monitoring</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-3 col-6">-->
+<!--                    <div class="stat-item">-->
+<!--                        <span class="stat-number">Secure</span>-->
+<!--                        <span class="stat-label">& Private</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+
+<!--    &lt;!&ndash; Features Section &ndash;&gt;-->
+<!--    <section class="py-5">-->
+<!--        <div class="container">-->
+<!--            <div class="row">-->
+<!--                <div class="col-md-4">-->
+<!--                    <div class="feature-card h-100">-->
+<!--                        <div class="text-center">-->
+<!--                            <i class="fas fa-eye feature-icon"></i>-->
+<!--                            <h4 class="fw-bold mb-3">Visual Monitoring</h4>-->
+<!--                            <p>Advanced computer vision algorithms detect suspicious activities, head pose changes, and unauthorized objects in real-time.</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-4">-->
+<!--                    <div class="feature-card h-100">-->
+<!--                        <div class="text-center">-->
+<!--                            <i class="fas fa-brain feature-icon"></i>-->
+<!--                            <h4 class="fw-bold mb-3">AI Detection</h4>-->
+<!--                            <p>Machine learning models trained on millions of data points to identify patterns and anomalies during assessments.</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-4">-->
+<!--                    <div class="feature-card h-100">-->
+<!--                        <div class="text-center">-->
+<!--                            <i class="fas fa-shield-alt feature-icon"></i>-->
+<!--                            <h4 class="fw-bold mb-3">Deepfake Protection</h4>-->
+<!--                            <p>State-of-the-art deepfake detection technology ensures the authenticity of the test-taker throughout the session.</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="row mt-4">-->
+<!--                <div class="col-md-6">-->
+<!--                    <div class="feature-card h-100">-->
+<!--                        <div class="text-center">-->
+<!--                            <i class="fas fa-microphone feature-icon"></i>-->
+<!--                            <h4 class="fw-bold mb-3">Audio Analysis</h4>-->
+<!--                            <p>Intelligent audio processing detects multiple voices, background noise, and verbal communications that may indicate cheating.</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="col-md-6">-->
+<!--                    <div class="feature-card h-100">-->
+<!--                        <div class="text-center">-->
+<!--                            <i class="fas fa-chart-line feature-icon"></i>-->
+<!--                            <h4 class="fw-bold mb-3">Real-time Analytics</h4>-->
+<!--                            <p>Live dashboard with suspicion scores, behavioral analytics, and instant alerts for proctor intervention when needed.</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+
+<!--    &lt;!&ndash; Footer &ndash;&gt;-->
+<!--    <footer class="text-center py-4" style="background: rgba(0,0,0,0.2); color: white;">-->
+<!--        <div class="container">-->
+<!--            <p class="mb-0">&copy; 2025 AI Proctoring System. Built with advanced AI technology.</p>-->
+<!--        </div>-->
+<!--    </footer>-->
+
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Proctoring System - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #1e40af;
+      --accent-color: #3b82f6;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .hero-section { padding: 60px 0; color: white; text-align: center; }
+    .hero-title { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+    .hero-subtitle { font-size: 1.5rem; margin-bottom: 2rem; opacity: 0.9; }
+    .feature-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 15px;
+      padding: 2rem; margin: 1rem 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      transition: transform .3s ease, box-shadow .3s ease; border: none;
+    }
+    .feature-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+    .feature-icon { font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem; }
+    .btn-primary-custom {
+      background: var(--primary-color); border: none; padding: 15px 40px; font-size: 1.1rem; font-weight: 600;
+      border-radius: 50px; transition: all .3s ease;
+    }
+    .btn-primary-custom:hover {
+      background: var(--secondary-color); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(37,99,235,.3);
+    }
+    .stats-section {
+      background: rgba(255,255,255,0.1); padding: 40px 0; margin: 60px 0; border-radius: 20px; backdrop-filter: blur(10px);
+    }
+    .stat-item { text-align: center; color: white; }
+    .stat-number { font-size: 3rem; font-weight: 700; display: block; }
+    .stat-label { font-size: 1.1rem; opacity: 0.8; }
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2.5rem; }
+      .hero-subtitle { font-size: 1.2rem; }
+      .feature-card { margin: .5rem 0; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(0,0,0,0.1);">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="fas fa-shield-alt me-2"></i>AI Proctor
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="/assessment">Assessment</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <div class="container">
+      <h1 class="hero-title">AI-Powered Proctoring</h1>
+      <p class="hero-subtitle">Real-time monitoring with YOLO object detection, head pose analysis, and audio activity cues</p>
+      <a href="/assessment" class="btn btn-primary-custom">
+        <i class="fas fa-play me-2"></i>Start Assessment
+      </a>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <span class="stat-number">Real-time</span>
+            <span class="stat-label">YOLOv8n Detection</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <span class="stat-number">Head</span>
+            <span class="stat-label">Pose Sensitivity</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <span class="stat-number">Audio</span>
+            <span class="stat-label">RMS Activity</span>
+          </div>
+        </div>
+        <div class="col-md-3 col-6">
+          <div class="stat-item">
+            <span class="stat-number">Live</span>
+            <span class="stat-label">Suspicion Score</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="feature-card h-100 text-center">
+            <i class="fas fa-eye feature-icon"></i>
+            <h4 class="fw-bold mb-3">Visual Monitoring</h4>
+            <p>Detects persons and devices like laptops or phones using YOLOv8n for reliable, low-latency insights.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card h-100 text-center">
+            <i class="fas fa-user-check feature-icon"></i>
+            <h4 class="fw-bold mb-3">Head Pose</h4>
+            <p>Estimates yaw/pitch per person to flag left/right/up/down states or missing face as suspicious cues.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card h-100 text-center">
+            <i class="fas fa-microphone feature-icon"></i>
+            <h4 class="fw-bold mb-3">Audio Activity</h4>
+            <p>Lightweight RMS-based monitoring highlights unusual audio activity during the assessment.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-center py-4" style="background: rgba(0,0,0,0.2); color: white;">
+    <div class="container">
+      <p class="mb-0">&copy; 2025 AI Proctoring System.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
