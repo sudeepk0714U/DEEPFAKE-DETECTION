@@ -1,538 +1,118 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>AI Proctoring - Live Assessment</title>-->
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
-<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
-<!--    <style>-->
-<!--        :root {-->
-<!--            &#45;&#45;primary-color: #2563eb;-->
-<!--            &#45;&#45;secondary-color: #1e40af;-->
-<!--            &#45;&#45;success-color: #10b981;-->
-<!--            &#45;&#45;warning-color: #f59e0b;-->
-<!--            &#45;&#45;danger-color: #ef4444;-->
-<!--            &#45;&#45;dark-bg: #1a1a1a;-->
-<!--            &#45;&#45;card-bg: #2d2d2d;-->
-<!--        }-->
-
-<!--        body {-->
-<!--            background: var(&#45;&#45;dark-bg);-->
-<!--            color: white;-->
-<!--            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;-->
-<!--            min-height: 100vh;-->
-<!--        }-->
-
-<!--        .assessment-container {-->
-<!--            padding: 20px 0;-->
-<!--            min-height: 100vh;-->
-<!--        }-->
-
-<!--        .video-container {-->
-<!--            position: relative;-->
-<!--            background: #000;-->
-<!--            border-radius: 15px;-->
-<!--            overflow: hidden;-->
-<!--            box-shadow: 0 10px 30px rgba(0,0,0,0.5);-->
-<!--        }-->
-
-<!--        #video {-->
-<!--            width: 100%;-->
-<!--            height: auto;-->
-<!--            min-height: 300px;-->
-<!--            object-fit: cover;-->
-<!--            border-radius: 15px;-->
-<!--        }-->
-
-<!--        .video-overlay {-->
-<!--            position: absolute;-->
-<!--            top: 10px;-->
-<!--            left: 10px;-->
-<!--            background: rgba(0,0,0,0.7);-->
-<!--            padding: 8px 12px;-->
-<!--            border-radius: 20px;-->
-<!--            font-size: 0.9rem;-->
-<!--            font-weight: 500;-->
-<!--        }-->
-
-<!--        .control-panel {-->
-<!--            background: var(&#45;&#45;card-bg);-->
-<!--            border-radius: 15px;-->
-<!--            padding: 25px;-->
-<!--            box-shadow: 0 10px 30px rgba(0,0,0,0.3);-->
-<!--            margin-top: 20px;-->
-<!--        }-->
-
-<!--        .stats-panel {-->
-<!--            background: var(&#45;&#45;card-bg);-->
-<!--            border-radius: 15px;-->
-<!--            padding: 25px;-->
-<!--            box-shadow: 0 10px 30px rgba(0,0,0,0.3);-->
-<!--            height: fit-content;-->
-<!--        }-->
-
-<!--        .stat-item {-->
-<!--            display: flex;-->
-<!--            justify-content: space-between;-->
-<!--            align-items: center;-->
-<!--            padding: 15px 0;-->
-<!--            border-bottom: 1px solid rgba(255,255,255,0.1);-->
-<!--        }-->
-
-<!--        .stat-item:last-child {-->
-<!--            border-bottom: none;-->
-<!--        }-->
-
-<!--        .stat-label {-->
-<!--            font-weight: 600;-->
-<!--            color: #ccc;-->
-<!--        }-->
-
-<!--        .stat-value {-->
-<!--            font-weight: 700;-->
-<!--            padding: 5px 15px;-->
-<!--            border-radius: 20px;-->
-<!--            font-size: 0.9rem;-->
-<!--        }-->
-
-<!--        .status-ok {-->
-<!--            background: var(&#45;&#45;success-color);-->
-<!--            color: white;-->
-<!--        }-->
-
-<!--        .status-warning {-->
-<!--            background: var(&#45;&#45;warning-color);-->
-<!--            color: white;-->
-<!--        }-->
-
-<!--        .status-danger {-->
-<!--            background: var(&#45;&#45;danger-color);-->
-<!--            color: white;-->
-<!--        }-->
-
-<!--        .btn-control {-->
-<!--            padding: 12px 30px;-->
-<!--            border-radius: 25px;-->
-<!--            font-weight: 600;-->
-<!--            border: none;-->
-<!--            transition: all 0.3s ease;-->
-<!--            margin: 5px;-->
-<!--        }-->
-
-<!--        .btn-start {-->
-<!--            background: var(&#45;&#45;success-color);-->
-<!--            color: white;-->
-<!--        }-->
-
-<!--        .btn-start:hover {-->
-<!--            background: #0d9660;-->
-<!--            transform: translateY(-2px);-->
-<!--        }-->
-
-<!--        .btn-stop {-->
-<!--            background: var(&#45;&#45;danger-color);-->
-<!--            color: white;-->
-<!--        }-->
-
-<!--        .btn-stop:hover {-->
-<!--            background: #dc2626;-->
-<!--            transform: translateY(-2px);-->
-<!--        }-->
-
-<!--        .connection-status {-->
-<!--            position: fixed;-->
-<!--            top: 20px;-->
-<!--            right: 20px;-->
-<!--            padding: 10px 20px;-->
-<!--            border-radius: 25px;-->
-<!--            font-weight: 600;-->
-<!--            font-size: 0.9rem;-->
-<!--            z-index: 1000;-->
-<!--            transition: all 0.3s ease;-->
-<!--            box-shadow: 0 4px 15px rgba(0,0,0,0.3);-->
-<!--        }-->
-
-<!--        .navbar-dark {-->
-<!--            background: rgba(0,0,0,0.9) !important;-->
-<!--            backdrop-filter: blur(10px);-->
-<!--        }-->
-
-<!--        .alert-custom {-->
-<!--            border: none;-->
-<!--            border-radius: 15px;-->
-<!--            padding: 20px;-->
-<!--            margin-bottom: 20px;-->
-<!--        }-->
-
-<!--        .alert-info-custom {-->
-<!--            background: linear-gradient(135deg, #3b82f6, #1e40af);-->
-<!--            color: white;-->
-<!--        }-->
-
-<!--        .suspicion-meter {-->
-<!--            background: #333;-->
-<!--            border-radius: 10px;-->
-<!--            height: 20px;-->
-<!--            overflow: hidden;-->
-<!--            margin-top: 10px;-->
-<!--        }-->
-
-<!--        .suspicion-fill {-->
-<!--            height: 100%;-->
-<!--            border-radius: 10px;-->
-<!--            transition: width 0.5s ease, background-color 0.5s ease;-->
-<!--        }-->
-
-<!--        .loading-spinner {-->
-<!--            display: none;-->
-<!--            justify-content: center;-->
-<!--            align-items: center;-->
-<!--            position: absolute;-->
-<!--            top: 50%;-->
-<!--            left: 50%;-->
-<!--            transform: translate(-50%, -50%);-->
-<!--        }-->
-
-<!--        @media (max-width: 768px) {-->
-<!--            .assessment-container {-->
-<!--                padding: 10px;-->
-<!--            }-->
-
-<!--            .control-panel, .stats-panel {-->
-<!--                margin-top: 15px;-->
-<!--                padding: 20px;-->
-<!--            }-->
-
-<!--            .btn-control {-->
-<!--                width: 100%;-->
-<!--                margin: 5px 0;-->
-<!--            }-->
-
-<!--            .connection-status {-->
-<!--                top: 10px;-->
-<!--                right: 10px;-->
-<!--                font-size: 0.8rem;-->
-<!--                padding: 8px 15px;-->
-<!--            }-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--    &lt;!&ndash; Navigation &ndash;&gt;-->
-<!--    <nav class="navbar navbar-expand-lg navbar-dark">-->
-<!--        <div class="container">-->
-<!--            <a class="navbar-brand fw-bold" href="/">-->
-<!--                <i class="fas fa-shield-alt me-2"></i>AI Proctor-->
-<!--            </a>-->
-<!--            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">-->
-<!--                <span class="navbar-toggler-icon"></span>-->
-<!--            </button>-->
-<!--            <div class="collapse navbar-collapse" id="navbarNav">-->
-<!--                <ul class="navbar-nav ms-auto">-->
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link" href="/">Home</a>-->
-<!--                    </li>-->
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link active" href="/assessment">Assessment</a>-->
-<!--                    </li>-->
-<!--                </ul>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </nav>-->
-
-<!--    &lt;!&ndash; Connection Status &ndash;&gt;-->
-<!--    <div id="connection-status" class="connection-status">-->
-<!--        <i class="fas fa-circle me-2"></i>Connecting...-->
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Main Assessment Interface &ndash;&gt;-->
-<!--    <div class="assessment-container">-->
-<!--        <div class="container-fluid">-->
-<!--            &lt;!&ndash; Instructions Alert &ndash;&gt;-->
-<!--            <div class="alert alert-info-custom alert-custom">-->
-<!--                <h5 class="mb-2"><i class="fas fa-info-circle me-2"></i>Assessment Instructions</h5>-->
-<!--                <p class="mb-0">Please ensure your face is clearly visible, maintain good lighting, and avoid looking away from the screen during the assessment. The AI system will monitor for suspicious activities.</p>-->
-<!--            </div>-->
-
-<!--            <div class="row">-->
-<!--                &lt;!&ndash; Video Section &ndash;&gt;-->
-<!--                <div class="col-lg-8">-->
-<!--                    <div class="video-container">-->
-<!--                        <video id="video" autoplay muted playsinline>-->
-<!--                            <p>Your browser does not support the video element.</p>-->
-<!--                        </video>-->
-<!--                        <div class="video-overlay">-->
-<!--                            <i class="fas fa-video me-2"></i>Live Camera Feed-->
-<!--                        </div>-->
-<!--                        <div class="loading-spinner" id="loadingSpinner">-->
-<!--                            <div class="spinner-border text-primary" role="status">-->
-<!--                                <span class="visually-hidden">Loading...</span>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-
-<!--                    &lt;!&ndash; Control Panel &ndash;&gt;-->
-<!--                    <div class="control-panel">-->
-<!--                        <div class="row align-items-center">-->
-<!--                            <div class="col-md-8">-->
-<!--                                <h5 class="mb-2"><i class="fas fa-cogs me-2"></i>Proctoring Controls</h5>-->
-<!--                                <p class="text-muted mb-0">Start monitoring to begin AI-powered assessment supervision</p>-->
-<!--                            </div>-->
-<!--                            <div class="col-md-4 text-md-end">-->
-<!--                                <button id="startBtn" class="btn btn-control btn-start" onclick="toggleStreaming()">-->
-<!--                                    <i class="fas fa-play me-2"></i>Start AI Detection-->
-<!--                                </button>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                &lt;!&ndash; Stats Panel &ndash;&gt;-->
-<!--                <div class="col-lg-4">-->
-<!--                    <div class="stats-panel">-->
-<!--                        <h5 class="mb-4"><i class="fas fa-chart-line me-2"></i>Detection Status</h5>-->
-
-<!--                        <div id="stats">-->
-<!--                            <div class="stat-item">-->
-<!--                                <span class="stat-label">Suspicion Level</span>-->
-<!--                                <span class="stat-value status-ok">0%</span>-->
-<!--                            </div>-->
-<!--                            <div class="suspicion-meter">-->
-<!--                                <div class="suspicion-fill" id="suspicionMeter" style="width: 0%; background-color: #10b981;"></div>-->
-<!--                            </div>-->
-
-<!--                            <div class="stat-item">-->
-<!--                                <span class="stat-label">AI Detection</span>-->
-<!--                                <span class="stat-value status-ok">Ready</span>-->
-<!--                            </div>-->
-
-<!--                            <div class="stat-item">-->
-<!--                                <span class="stat-label">Head Position</span>-->
-<!--                                <span class="stat-value status-ok">✅ OK</span>-->
-<!--                            </div>-->
-
-<!--                            <div class="stat-item">-->
-<!--                                <span class="stat-label">Audio Monitor</span>-->
-<!--                                <span class="stat-value status-ok">✅ OK</span>-->
-<!--                            </div>-->
-
-<!--                            <div class="stat-item">-->
-<!--                                <span class="stat-label">Deepfake Check</span>-->
-<!--                                <span class="stat-value status-ok">✅ OK</span>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        &lt;!&ndash; Additional Info &ndash;&gt;-->
-<!--                        <div class="mt-4 p-3" style="background: rgba(59, 130, 246, 0.1); border-radius: 10px; border-left: 4px solid #3b82f6;">-->
-<!--                            <h6 class="text-primary mb-2"><i class="fas fa-lightbulb me-2"></i>Tips</h6>-->
-<!--                            <ul class="small mb-0 text-muted">-->
-<!--                                <li>Keep your face centered in the camera</li>-->
-<!--                                <li>Ensure good lighting on your face</li>-->
-<!--                                <li>Avoid multiple people in frame</li>-->
-<!--                                <li>Minimize background noise</li>-->
-<!--                            </ul>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    &lt;!&ndash; Scripts &ndash;&gt;-->
-<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>-->
-<!--    <script src="{{ url_for('static', filename='js/main.js') }}"></script>-->
-<!--</body>-->
-<!--</html>-->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>AI Proctoring - Live Assessment</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
   <style>
-    :root {
-      --primary-color: #2563eb;
-      --secondary-color: #1e40af;
-      --success-color: #10b981;
-      --warning-color: #f59e0b;
-      --danger-color: #ef4444;
-      --dark-bg: #1a1a1a;
-      --card-bg: #2d2d2d;
+    :root{
+      --primary:#2563eb; --primary-600:#1e40af; --accent:#3b82f6;
+      --success:#0f9d58; --warning:#f59e0b; --danger:#d93025;
+      --bg:#f7f9fc; --surface:#ffffff; --ink-900:#0f172a; --ink-700:#334155; --ink-500:#64748b;
+      --radius-lg:16px; --radius-md:12px; --radius-sm:10px;
+      --shadow-sm:0 6px 16px rgba(15,23,42,.10); --shadow-md:0 12px 28px rgba(15,23,42,.16);
+      --ring:0 0 0 .2rem rgba(37,99,235,.25)
     }
-    body { background: var(--dark-bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; }
-    .assessment-container { padding: 20px 0; min-height: 100vh; }
-    .video-container { position: relative; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
-    #video { width: 100%; height: auto; min-height: 300px; object-fit: cover; border-radius: 15px; }
-    .video-overlay { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,.7); padding: 8px 12px; border-radius: 20px; font-size: .9rem; font-weight: 500; }
-    .control-panel, .stats-panel { background: var(--card-bg); border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
-    .control-panel { margin-top: 20px; }
-    .stats-panel { height: fit-content; }
-    .stat-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .stat-item:last-child { border-bottom: none; }
-    .stat-label { font-weight: 600; color: #ccc; }
-    .stat-value { font-weight: 700; padding: 5px 15px; border-radius: 20px; font-size: .9rem; }
-    .status-ok { background: var(--success-color); color: white; }
-    .status-warning { background: var(--warning-color); color: white; }
-    .status-danger { background: var(--danger-color); color: white; }
-    .btn-control { padding: 12px 30px; border-radius: 25px; font-weight: 600; border: none; transition: all .3s ease; margin: 5px; }
-    .btn-start { background: var(--success-color); color: white; }
-    .btn-start:hover { background: #0d9660; transform: translateY(-2px); }
-    .btn-stop { background: var(--danger-color); color: white; }
-    .btn-stop:hover { background: #dc2626; transform: translateY(-2px); }
-    .connection-status {
-      position: fixed; top: 20px; right: 20px; padding: 10px 20px; border-radius: 25px; font-weight: 600; font-size: .9rem;
-      z-index: 1000; transition: all .3s ease; box-shadow: 0 4px 15px rgba(0,0,0,.3);
-    }
-    .navbar-dark { background: rgba(0,0,0,0.9) !important; backdrop-filter: blur(10px); }
-    .alert-custom { border: none; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
-    .alert-info-custom { background: linear-gradient(135deg, #3b82f6, #1e40af); color: white; }
-    .suspicion-meter { background: #333; border-radius: 10px; height: 20px; overflow: hidden; margin-top: 10px; }
-    .suspicion-fill { height: 100%; border-radius: 10px; transition: width .5s ease, background-color .5s ease; }
-    .loading-spinner { display: none; justify-content: center; align-items: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    @media (max-width: 768px) {
-      .assessment-container { padding: 10px; }
-      .control-panel, .stats-panel { margin-top: 15px; padding: 20px; }
-      .btn-control { width: 100%; margin: 5px 0; }
-      .connection-status { top: 10px; right: 10px; font-size: .8rem; padding: 8px 15px; }
-    }
+    *{box-sizing:border-box} html,body{margin:0;padding:0}
+    body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans";background:var(--bg);color:var(--ink-900);min-height:100vh}
+    a{text-decoration:none;color:inherit}
+    .container{max-width:1200px;margin:0 auto;padding:0 20px}
+    .navbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(15,23,42,.06)}
+    .nav-wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .nav{display:flex;gap:18px}
+    .nav a{padding:10px 12px;border-radius:10px;color:var(--ink-700)}
+    .nav a.active,.nav a:hover{background:rgba(37,99,235,.08);color:var(--primary)}
+    .page{padding:20px 0}
+    .info{background:linear-gradient(135deg,#e0e7ff,#c7d2fe);border:1px solid rgba(37,99,235,.15);color:#0b1a3a;border-radius:var(--radius-md);padding:16px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+    .row{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+    .panel{background:var(--surface);border:1px solid rgba(2,6,23,.06);border-radius:15px;padding:20px;box-shadow:var(--shadow-sm)}
+    .video-wrap{position:relative;background:#000;border-radius:15px;overflow:hidden;box-shadow:var(--shadow-md)}
+    #video{width:100%;height:auto;min-height:320px;object-fit:cover;display:block}
+    .overlay{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);color:#fff;padding:8px 12px;border-radius:20px;font-weight:600}
+    .controls{margin-top:12px}
+    .muted{color:var(--ink-500)}
+    .btn{display:inline-flex;align-items:center;gap:10px;padding:11px 22px;border-radius:999px;border:1px solid transparent;cursor:pointer;transition:.2s transform,.2s box-shadow}
+    .btn-start{background:var(--success);color:#fff;box-shadow:0 8px 20px rgba(15,157,88,.22)}
+    .btn-start:hover{transform:translateY(-1px);background:#0c8b4c}
+    .meter{background:#e5e7eb;border-radius:10px;height:16px;overflow:hidden}
+    .fill{height:100%;border-radius:10px;transition:width .4s ease,background-color .4s ease;background:var(--success)}
+    .kv{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(2,6,23,.06)}
+    .kv:last-child{border-bottom:none}
+    .chip{display:inline-block;padding:6px 12px;border-radius:999px;font-weight:700;font-size:.85rem}
+    .ok{background:#e8faf1;color:#147d55}
+    .warn{background:#fff4e5;color:#a86207}
+    .bad{background:#fde8e8;color:#b42318}
+    .status{position:fixed;top:16px;right:16px;background:rgba(0,0,0,.75);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+    .tips{margin-top:16px;padding:12px;border-left:4px solid var(--primary);border-radius:10px;background:#f0f5ff;color:#0b1a3a}
+    footer{margin-top:24px;text-align:center;color:var(--ink-700);padding:16px 0}
+    @media (max-width:980px){.row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="/">
-        <i class="fas fa-shield-alt me-2"></i>AI Proctor
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/assessment">Assessment</a></li>
-        </ul>
-      </div>
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a class="brand" href="/"><i class="fas fa-shield-alt"></i><span>AI Proctor</span></a>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a class="active" href="/assessment">Assessment</a>
+      </nav>
     </div>
-  </nav>
+  </header>
 
-  <!-- Connection Status -->
-  <div id="connection-status" class="connection-status">
-    <i class="fas fa-circle me-2"></i>Connecting...
-  </div>
+  <div class="status" id="connection-status"><i class="fas fa-circle me-2"></i>Connecting...</div>
 
-  <div class="assessment-container">
-    <div class="container-fluid">
-      <div class="alert alert-info-custom alert-custom">
-        <h5 class="mb-2"><i class="fas fa-info-circle me-2"></i>Assessment Instructions</h5>
-        <p class="mb-0">Ensure a clear face view, steady lighting, and avoid looking away; detection includes persons, devices, head pose, and audio activity.</p>
+  <main class="page">
+    <div class="container">
+      <div class="info">
+        <strong><i class="fas fa-info-circle"></i> Assessment Instructions:</strong>
+        Ensure a clear face view, steady lighting, and avoid looking away; detection includes persons, devices, head pose, and audio activity.
       </div>
 
       <div class="row">
-        <div class="col-lg-8">
-          <div class="video-container">
+        <section>
+          <div class="video-wrap">
             <video id="video" autoplay muted playsinline>
               <p>Your browser does not support the video element.</p>
             </video>
-            <div class="video-overlay">
-              <i class="fas fa-video me-2"></i>Live Camera Feed
-            </div>
-            <div class="loading-spinner" id="loadingSpinner">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
+            <div class="overlay"><i class="fas fa-video"></i> Live Camera Feed</div>
           </div>
 
-          <div class="control-panel">
-            <div class="row align-items-center">
-              <div class="col-md-8">
-                <h5 class="mb-2"><i class="fas fa-cogs me-2"></i>Proctoring Controls</h5>
-                <p class="text-muted mb-0">Start monitoring to begin YOLO detection, head pose, and audio checks</p>
+          <div class="panel controls">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <div>
+                <h3 style="margin:0 0 4px">Proctoring Controls</h3>
+                <p class="muted" style="margin:0">Start monitoring to begin YOLO detection, head pose, and audio checks</p>
               </div>
-              <div class="col-md-4 text-md-end">
-                <button id="startBtn" class="btn btn-control btn-start" onclick="toggleStreaming()">
-                  <i class="fas fa-play me-2"></i>Start AI Detection
-                </button>
-              </div>
+              <button id="startBtn" class="btn btn-start" onclick="toggleStreaming()">
+                <i class="fas fa-play"></i> Start AI Detection
+              </button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="col-lg-4">
-          <div class="stats-panel">
-            <h5 class="mb-4"><i class="fas fa-chart-line me-2"></i>Detection Status</h5>
+        <aside>
+          <div class="panel">
+            <h3 style="margin-top:0;margin-bottom:14px"><i class="fas fa-chart-line"></i> Detection Status</h3>
 
             <div id="stats">
-              <div class="stat-item">
-                <span class="stat-label">Suspicion Level</span>
-                <span id="suspicionValue" class="stat-value status-ok">0%</span>
-              </div>
-              <div class="suspicion-meter">
-                <div class="suspicion-fill" id="suspicionMeter" style="width: 0%; background-color: #10b981;"></div>
-              </div>
+              <div class="kv"><span class="muted">Suspicion Level</span><span id="suspicionValue" class="chip ok">0%</span></div>
+              <div class="meter"><div class="fill" id="suspicionMeter" style="width:0%"></div></div>
 
-              <div class="stat-item">
-                <span class="stat-label">Detection</span>
-                <span id="aiGuessValue" class="stat-value status-ok">Ready</span>
-              </div>
+              <div class="kv"><span class="muted">Detection</span><span id="aiGuessValue" class="chip ok">Ready</span></div>
+              <div class="kv"><span class="muted">Head Position</span><span id="headPoseValue" class="chip ok">✅ OK</span></div>
+              <div class="kv"><span class="muted">Audio Monitor</span><span id="audioValue" class="chip ok">✅ OK</span></div>
+              <div class="kv"><span class="muted">Deepfake Check</span><span id="deepfakeValue" class="chip ok">✅ OK</span></div>
 
-              <div class="stat-item">
-                <span class="stat-label">Head Position</span>
-                <span id="headPoseValue" class="stat-value status-ok">✅ OK</span>
-              </div>
-
-              <div class="stat-item">
-                <span class="stat-label">Audio Monitor</span>
-                <span id="audioValue" class="stat-value status-ok">✅ OK</span>
-              </div>
-
-              <div class="stat-item">
-                <span class="stat-label">Deepfake Check</span>
-                <span id="deepfakeValue" class="stat-value status-ok">✅ OK</span>
-              </div>
-
-              <!-- New: People/Devices/Audio RMS summaries the JS will fill -->
-              <div class="stat-item">
-                <span class="stat-label">People</span>
-                <span id="peopleSummary" class="stat-value status-ok" style="background:#374151;">None</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Devices</span>
-                <span id="devicesSummary" class="stat-value status-ok" style="background:#374151;">None</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Audio RMS</span>
-                <span id="audioRmsValue" class="stat-value status-ok" style="background:#374151;">0.0000</span>
-              </div>
+              <div class="kv"><span class="muted">People</span><span id="peopleSummary" class="chip" style="background:#eef2ff;color:#1e2a66">None</span></div>
+              <div class="kv"><span class="muted">Devices</span><span id="devicesSummary" class="chip" style="background:#eef2ff;color:#1e2a66">None</span></div>
+              <div class="kv"><span class="muted">Audio RMS</span><span id="audioRmsValue" class="chip" style="background:#eef2ff;color:#1e2a66">0.0000</span></div>
             </div>
 
-            <div class="mt-4 p-3" style="background: rgba(59,130,246,0.1); border-radius: 10px; border-left: 4px solid #3b82f6;">
-              <h6 class="text-primary mb-2"><i class="fas fa-lightbulb me-2"></i>Tips</h6>
-              <ul class="small mb-0 text-muted">
+            <div class="tips">
+              <strong><i class="fas fa-lightbulb"></i> Tips</strong>
+              <ul style="margin:8px 0 0 18px;color:var(--ink-700)">
                 <li>Keep the face centered in the camera</li>
                 <li>Ensure good lighting on the face</li>
                 <li>Avoid multiple people or devices in frame</li>
@@ -540,12 +120,13 @@
               </ul>
             </div>
           </div>
-        </div>
-      </div> <!-- row -->
+        </aside>
+      </div>
     </div>
-  </div>
+  </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <footer>© 2025 AI Proctoring System</footer>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
