@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ test.name }} • Reports</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      color-scheme: light;
+      --bg:#f7f9fc; --ink:#0f172a; --muted:#64748b;
+      --card:#ffffff; --border:#e5e7eb;
+      --primary:#2563eb; --primary-600:#1e40af;
+      --link:#2563eb;
+      --radius:14px; --shadow:0 16px 36px rgba(15,23,42,.10)
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg,#f7faff,#f2f6ff 35%,#eef4ff);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1100px; margin: 32px auto; padding: 0 16px; }
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap: wrap; }
+    .title { font-size:26px; margin:0; font-weight:800; letter-spacing:.2px }
+    .muted { color:var(--muted); }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:var(--shadow); }
+
+    .nav a { color:var(--link); text-decoration:none; }
+    .nav a:hover { text-decoration:underline; }
+
+    .table-wrap { width:100%; overflow-x:auto; } /* responsive scroll if needed */ /* [web:209] */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      table-layout: fixed; /* stable columns */ /* [web:209] */
+    }
+    thead th{ background:#f1f5ff; color:#334155; }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    th { color: var(--muted); font-weight:700; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+
+    .badge { display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); color:#475569; background:#f8fafc; white-space:nowrap; }
+
+    .actions { display:flex; gap:8px; flex-wrap: wrap; }
+    a.btnlike { text-decoration:none; }
+    a.btnlike > button { width:100%; }
+    button.primary {
+      background:var(--primary); border:0; color:white; cursor:pointer; font-weight:700; padding:8px 12px; border-radius:10px;
+    }
+    button.primary:hover { background:var(--primary-600); }
+
+    .empty { color:var(--muted); text-align:center; padding:24px; }
+
+    .kvs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 6px 12px;
+    }
+    .kv { display:flex; gap:6px; flex-wrap:wrap; min-width:0; }
+    .kv .k { color:var(--muted); min-width:120px; flex-shrink:0; }
+
+    @media (max-width: 768px) {
+      th, td { font-size:12px; padding:8px; }
+      .kvs { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1 class="title">{{ test.name }} — Reports</h1>
+        <div class="muted">Company test ID {{ test.id }} • Join code <span class="mono">{{ test.join_code }}</span></div>
+      </div>
+      <div class="nav">
+        <a href="{{ url_for('company_dashboard') }}">Back to dashboard</a>
+      </div>
+    </div>
+
+    <div class="card">
+      {% if reports and reports|length > 0 %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Candidate</th>
+              <th>Summary</th>
+              <th>Window</th>
+              <th>Metrics</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in reports %}
+            {% set p = r.payload %}
+            {% set u = users.get(r.user_id) %}
+            <tr>
+              <td class="mono">{{ loop.index }}</td>
+              <td>
+                <div>Candidate: <span class="mono">{{ u.name if u and u.name else (u.email if u else 'Unknown') }}</span></div>
+                <div class="muted">User ID: <span class="mono">{{ r.user_id }}</span></div>
+                <div class="muted">Report ID: <span class="mono">{{ r.id }}</span></div>
+              </td>
+              <td>
+                <div class="kvs">
+                  <div class="kv"><div class="k">Max suspicion</div><div>{{ '%.2f' % (p.max_suspicion if p.max_suspicion is defined else 0.0) }}</div></div>
+                  <div class="kv"><div class="k">Avg suspicion</div><div>{{ '%.2f' % (p.avg_suspicion if p.avg_suspicion is defined else 0.0) }}</div></div>
+                  <div class="kv"><div class="k">Suspicious frames</div><div>{{ p.suspicious_frames if p.suspicious_frames is defined else 0 }}</div></div>
+                </div>
+              </td>
+              <td class="muted">
+                <div>Start: {{ p.start_time if p.start_time is defined else '-' }}</div>
+                <div>End: {{ p.end_time if p.end_time is defined else '-' }}</div>
+              </td>
+              <td>
+                <div class="kvs">
+                  <div class="kv"><div class="k">Frames</div><div>{{ p.total_frames if p.total_frames is defined else 0 }}</div></div>
+                  <div class="kv"><div class="k">Head pose warnings</div><div>{{ p.head_pose_warnings if p.head_pose_warnings is defined else 0 }}</div></div>
+                  <div class="kv"><div class="k">Audio warnings</div><div>{{ p.audio_warnings if p.audio_warnings is defined else 0 }}</div></div>
+                  <div class="kv"><div class="k">Laptop detections</div><div>{{ (p.device_detections['laptop'] if p.device_detections is defined and 'laptop' in p.device_detections else 0) }}</div></div>
+                  <div class="kv"><div class="k">Phone detections</div><div>{{ (p.device_detections['cell phone'] if p.device_detections is defined and 'cell phone' in p.device_detections else 0) }}</div></div>
+                </div>
+              </td>
+              <td class="actions">
+                <a class="btnlike" href="{{ url_for('report', rid=r.id) }}">
+                  <button type="button" class="primary">Open report view</button>
+                </a>
+                {% if r.snapshot_id %}
+                <a class="btnlike" href="{{ url_for('report', report_id=r.snapshot_id) }}">
+                  <button type="button" class="primary">Open snapshot</button>
+                </a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="empty">No reports have been submitted for this test yet.</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

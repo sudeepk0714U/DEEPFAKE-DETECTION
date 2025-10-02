@@ -1,4 +1,4 @@
-// Initialize Socket.IO connection
+// Initialize Socket.IO connection only on assessment page after login
 let socket = io();
 let streaming = false;
 let statsDiv = document.getElementById('stats');
@@ -30,8 +30,7 @@ function updateConnectionStatus(status, color) {
 }
 updateConnectionStatus('Connecting...', 'orange');
 
-// ===== SOCKET EVENTS =====
-
+// Require authenticated session; server will refuse unauthenticated connects
 socket.on('connect', function() {
     updateConnectionStatus('Connected', 'green');
 });
@@ -50,7 +49,7 @@ socket.on('connect_error', function(error) {
 });
 
 socket.on('connection_confirmed', function(data) {
-    // Connected
+    // Connected and authorized
 });
 
 socket.on('ai_result', function(data) {
@@ -71,24 +70,20 @@ socket.on('ai_result', function(data) {
     updateStats(suspicionPercent + '%', detectedClass, headPose, audio, deepfake, persons, devices, audioRms);
 });
 
-// Server-driven redirect: navigate after snapshot is saved
+// Server-driven redirect to report
 socket.on('redirect_to_report', function(data) {
     const url = (data && data.url) ? data.url : '/report';
 
-    // Stop streams and timers
     streaming = false;
     if (frameInterval) { clearInterval(frameInterval); frameInterval = null; }
     if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
     if (video && video.srcObject) video.srcObject = null;
 
-    // Multiple navigation methods + hard reload fallback
     try { window.location.assign(url); } catch (e) {}
     setTimeout(() => { try { window.location.replace(url); } catch (e) {} }, 150);
     setTimeout(() => { try { window.location.href = url; } catch (e) {} }, 300);
     setTimeout(() => { try { location.reload(true); } catch (e) {} }, 1500);
 });
-
-// ===== STREAMING CONTROL =====
 
 function toggleStreaming() {
     if (!socket.connected) {
@@ -139,7 +134,6 @@ function stopStreaming() {
 
     updateStats('Processing...', 'Generating report', 'Finalizing', 'Finalizing', 'Finalizing', [], [], '?');
 
-    // Include our socket id so server emits to this specific client and maps report
     socket.emit('stop_detection', { sid: socket.id });
 }
 
@@ -162,8 +156,6 @@ function sendFrame() {
         updateStats('Frame Capture Error', '?', 'Error', 'Error', 'Error', [], [], '?');
     }
 }
-
-// ===== UI =====
 
 function summarizePeople(persons) {
     if (!persons.length) return 'None';
@@ -188,16 +180,17 @@ function updateStats(suspicion, aiGuess, headPose, audio, deepfake, persons, dev
     const peopleInfo = summarizePeople(persons || []);
     const deviceInfo = summarizeDevices(devices || []);
 
+    if (!statsDiv) return;
     statsDiv.innerHTML = `
         <div style="display: grid; gap: 8px; font-family: monospace;">
-            <div><strong>Suspicion:</strong> <span style="color: ${getSuspicionColor(suspicion)}">${suspicion}</span></div>
-            <div><strong>AI Top Guess:</strong> ${aiGuess}</div>
-            <div><strong>Head Pose:</strong> ${headPose}</div>
-            <div><strong>Audio:</strong> ${audio}</div>
-            <div><strong>Deepfake:</strong> ${deepfake}</div>
-            <div style="margin-top:8px;"><strong>People:</strong> ${peopleInfo}</div>
-            <div><strong>Devices:</strong> ${deviceInfo}</div>
-            <div><strong>Audio RMS:</strong> ${audioRms}</div>
+            <div><span>Suspicion:</span> <span style="color: ${getSuspicionColor(suspicion)}">${suspicion}</span></div>
+            <div><span>AI Top Guess:</span> ${aiGuess}</div>
+            <div><span>Head Pose:</span> ${headPose}</div>
+            <div><span>Audio:</span> ${audio}</div>
+            <div><span>Deepfake:</span> ${deepfake}</div>
+            <div style="margin-top:8px;"><span>People:</span> ${peopleInfo}</div>
+            <div><span>Devices:</span> ${deviceInfo}</div>
+            <div><span>Audio RMS:</span> ${audioRms}</div>
         </div>
     `;
 }
@@ -218,5 +211,4 @@ function getSuspicionColor(suspicion) {
     return '#44ff44';
 }
 
-// Expose toggle for button onclick
 window.toggleStreaming = toggleStreaming;

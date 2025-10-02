@@ -7,3 +7,5 @@ tensorflow
 torch
 transformers
 librosa
+flask-sqlalchemy
+flask-login

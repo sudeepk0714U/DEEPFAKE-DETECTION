@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Company Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      color-scheme: light;
+      --bg:#f7f9fc; --ink:#0f172a; --muted:#64748b;
+      --card:#ffffff; --border:#e5e7eb;
+      --primary:#2563eb; --primary-600:#1e40af;
+      --secondary:#10b981; --secondary-600:#059669;
+      --danger:#ef4444; --danger-600:#dc2626;
+      --link:#2563eb;
+      --radius:14px; --shadow:0 16px 36px rgba(15,23,42,.10)
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg,#f7faff,#f2f6ff 35%,#eef4ff);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1000px; margin: 32px auto; padding: 0 16px; }
+
+    /* Header wraps on small screens */
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap: wrap; }
+    .title { font-size:26px; margin:0; font-weight:800; letter-spacing:.2px }
+    .muted { color:var(--muted); }
+    .nav a { color:var(--link); text-decoration:none; }
+    .nav a:hover { text-decoration:underline; }
+
+    .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:var(--shadow); }
+
+    /* Top bar wraps inputs/buttons */
+    .topbar { display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap: wrap; }
+    .row { display:flex; gap:12px; align-items:center; flex-wrap: wrap; }
+    .spacer { flex:1; min-width:12px; }
+
+    input, button {
+      padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#f9fbff; color:var(--ink);
+      font-size:15px; outline:none; transition: box-shadow .15s ease, border-color .15s ease, background .15s;
+    }
+    input { min-width: 220px; max-width: 100%; }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.12); background:#fff }
+
+    button.primary { background:var(--primary); color:#fff; border:0; cursor:pointer; font-weight:700; }
+    button.primary:hover { background:var(--primary-600); }
+    button.secondary { background:var(--secondary); color:#fff; border:0; cursor:pointer; font-weight:700; }
+    button.secondary:hover { background:var(--secondary-600); }
+    button.danger { background:var(--danger); color:#fff; border:0; cursor:pointer; font-weight:700; }
+    button.danger:hover { background:var(--danger-600); }
+
+    a.btnlike { text-decoration:none; }
+    a.btnlike > button { width:100%; }
+
+    .flash { background:#e9f7ef; color:#0b5d3b; padding:10px; border-radius:10px; margin-bottom:12px; border:1px solid #bbf7d0; }
+    .empty { color:var(--muted); text-align:center; padding:24px; }
+    form.inline { display:inline; margin:0; }
+
+    /* Make table scrollable and prevent overlap */
+    .table-wrap { width:100%; overflow-x:auto; }
+    table { width:100%; border-collapse: collapse; margin-top:16px; table-layout: fixed; }
+    th, td {
+      padding:12px; border-bottom:1px solid var(--border); text-align:left; font-size:14px; vertical-align: top;
+      overflow-wrap:anywhere; word-break:break-word;
+    }
+    thead th { color:#334155; background:#f1f5ff; border-top-left-radius:8px; border-top-right-radius:8px; }
+    th { color:var(--muted); font-weight:700; }
+    .code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; letter-spacing:2px; }
+    .badge { display:inline-block; padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); color:#475569; background:#f8fafc; white-space:nowrap; }
+
+    /* Actions wrap to next line if needed */
+    .actions { display:flex; gap:8px; flex-wrap: wrap; }
+
+    @media (max-width: 720px) {
+      th, td { font-size:13px; padding:10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div>
+        <h1 class="title">Company dashboard</h1>
+        <div class="muted">Create tests, share join codes, host assessments, and review candidate reports.</div>
+      </div>
+      <div class="nav">
+        <a href="{{ url_for('logout') }}">Logout</a>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="flash">{{ messages[0] }}</div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="card">
+      <div class="topbar">
+        <form class="row" method="POST" action="{{ url_for('create_test') }}">
+          <input type="text" name="name" placeholder="New test name (e.g., Backend Interview - Oct Batch)" required />
+          <button class="primary" type="submit">Create Test</button>
+        </form>
+        <div class="spacer"></div>
+        <div class="muted">Status: open accepts candidates, closed is locked.</div>
+      </div>
+
+      {% if tests and tests|length > 0 %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Join code</th>
+              <th>Status</th>
+              <th>Window</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tests %}
+            <tr>
+              <td>{{ t.name }}</td>
+              <td class="code">{{ t.join_code }}</td>
+              <td><span class="badge">{{ t.status }}</span></td>
+              <td class="muted">
+                {% if t.start_at %}{{ t.start_at.strftime('%Y-%m-%d %H:%M') }}{% else %}-{% endif %} —
+                {% if t.end_at %}{{ t.end_at.strftime('%Y-%m-%d %H:%M') }}{% else %}-{% endif %}
+              </td>
+              <td class="actions">
+                <a class="btnlike" href="{{ url_for('assessment', test_id=t.id) }}"><button type="button" class="secondary">Host assessment</button></a>
+                <a class="btnlike" href="{{ url_for('company_test_reports', test_id=t.id) }}"><button type="button" class="primary">View reports</button></a>
+                <form class="inline" method="POST" action="{{ url_for('close_test', test_id=t.id) }}" onsubmit="return confirm('Close this test? Candidates will no longer be able to join.');">
+                  <button type="submit" class="danger" {% if t.status == 'closed' %}disabled{% endif %}>Close</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="empty">No tests yet. Create a test using the form above to generate a join code and start hosting.</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

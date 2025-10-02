@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Join Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      color-scheme: light;
+      --bg:#f7f9fc; --ink:#0f172a; --muted:#64748b;
+      --card:#ffffff; --border:#e5e7eb;
+      --primary:#2563eb; --primary-600:#1e40af;
+      --error-bg:#fee2e2; --error-ink:#7f1d1d;
+      --radius:14px; --shadow:0 16px 36px rgba(15,23,42,.12)
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(135deg,#f7faff,#f2f6ff 35%,#eef4ff);
+      color: var(--ink);
+      min-height: 100vh;
+      display: grid; place-items: center;
+      padding: 24px;
+    }
+    .card{
+      width: 100%; max-width: 460px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .title{ margin:0 0 8px; font-size: 26px; font-weight: 800; letter-spacing:.2px }
+    .muted{ margin:0 0 18px; color: var(--muted); font-size: 14px }
+
+    .field{ margin-bottom: 12px }
+    label{ display:block; font-size:13px; color: var(--muted); margin-bottom:6px }
+    input, button{
+      width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border);
+      font-size:15px; outline:none; transition: box-shadow .15s ease, border-color .15s ease, background .15s
+    }
+    /* Uppercase code entry with normal placeholder */
+    input.code{ background:#f9fbff; text-transform: uppercase; letter-spacing: 2px }
+    input:focus{ border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.12) }
+    ::placeholder{ text-transform: none; opacity:.7 } /* keep placeholder readable */
+
+    button{
+      background: var(--primary); color:#fff; border:0; cursor:pointer; font-weight:700; letter-spacing:.2px;
+      margin-top: 4px;
+    }
+    button:hover{ background: var(--primary-600) }
+
+    .row{ display:flex; gap:10px; margin-top:8px }
+    .btnlink{ flex:1 }
+    .btnlink button{ width:100%; background:#fff; color:var(--primary); border:1px solid var(--primary) }
+    .btnlink button:hover{ background:#f0f5ff }
+
+    .error{
+      background: var(--error-bg);
+      color: var(--error-ink);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #fecaca;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .success{
+      background: #e9f7ef;
+      color: #0b5d3b;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #b7ebc6;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 480px){
+      .card{ padding:22px }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 class="title">Join a test</h1>
+    <p class="muted">Enter the join code shared by the company host. Codes are case-insensitive.</p>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="error">{{ messages[0] }}</div>
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('join_test') }}">
+      <div class="field">
+        <label for="code">Join code</label>
+        <input id="code" class="code" type="text" name="code" placeholder="JOIN CODE" maxlength="16" required />
+      </div>
+      <button type="submit">Join Test</button>
+    </form>
+
+    <div class="muted" style="margin-top:12px">Need an account?</div>
+    <div class="row">
+      <a class="btnlink" href="{{ url_for('register_user') }}"><button type="button">Register User</button></a>
+      <a class="btnlink" href="{{ url_for('login') }}"><button type="button">Back to login</button></a>
+    </div>
+  </div>
+</body>
+</html>
