@@ -15,4 +15,4 @@ tensorflow
 torchvision
 flask-session
 ultralytics
-mediapipe
+mediapipe-silicon
