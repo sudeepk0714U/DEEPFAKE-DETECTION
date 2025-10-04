@@ -14,3 +14,4 @@ flask-login
 tensorflow
 torchvision
 flask-session
+ultralytics
