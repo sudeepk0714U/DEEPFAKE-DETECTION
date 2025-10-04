@@ -1,6 +1,9 @@
 Flask
 Flask-SocketIO
 opencv-python
+protobuf
+absl-py
+flatbuffers
 mediapipe
 numpy
 tensorflow
