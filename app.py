@@ -534,4 +534,4 @@ if __name__ == "__main__":
     print("Assessment: http://localhost:5001/assessment")
     print("Report:     http://localhost:5001/report")
     print("Login:      http://localhost:5001/login")
-    socketio.run(app, debug=True, host='0.0.0.0', port=5001, allow_unsafe_werkzeug=True)
+    socketio.run(app,host='0.0.0.0', port=5001, allow_unsafe_werkzeug=True)
