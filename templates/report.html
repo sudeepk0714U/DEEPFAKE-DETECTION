@@ -101,6 +101,37 @@
       </div>
     {% endif %}
 
+    <!-- NEW: Deepfake Analysis -->
+    <h2 class="section-title">🧠 Deepfake Analysis</h2>
+    {% if data.deepfake_warnings and data.deepfake_warnings > 0 %}
+      <div class="warn">
+        <h3 style="margin:0 0 6px">⚠️ Deepfake Flags</h3>
+        <p style="margin:0 8px 8px 0">
+          Deepfake warnings were raised <strong>{{ data.deepfake_warnings }}</strong> time(s) based on a rolling median threshold. Review the recent scores below.
+        </p>
+        <div class="grid">
+          <div class="info">
+            <div class="k">Warnings Count</div>
+            <div class="v">{{ data.deepfake_warnings }}</div>
+          </div>
+          <div class="info">
+            <div class="k">Recent Scores (last {{ (data.deepfake_scores_last or [])|length }})</div>
+            <div class="v" style="font-family:monospace; white-space:nowrap; overflow:auto; max-width:100%;">
+              {% for s in (data.deepfake_scores_last or []) %}
+                {{ "%.2f"|format(s) }}{% if not loop.last %}, {% endif %}
+              {% endfor %}
+              {% if (data.deepfake_scores_last or [])|length == 0 %}—{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="ok">
+        <h3 style="margin:0 0 6px">✅ No Deepfake Warnings</h3>
+        <p style="margin:0">No deepfake risk thresholds were exceeded during this session.</p>
+      </div>
+    {% endif %}
+
     <h2 class="section-title">📱 Device Detection Summary</h2>
     <div class="grid">
       <div class="info"><div class="k">💻 Laptop Detections</div><div class="v">{{ data.device_detections.laptop }}</div></div>
@@ -132,6 +163,8 @@
             <th>Detected Class</th>
             <th>Persons</th>
             <th>Devices</th>
+            <th>Deepfake Score</th> <!-- NEW -->
+            <th>Deepfake Flag</th>  <!-- NEW -->
           </tr>
         </thead>
         <tbody>
@@ -145,6 +178,14 @@
             <td>{{ frame.detected_class }}</td>
             <td>{{ frame.persons_count }}</td>
             <td>{{ frame.devices_count }}</td>
+            <td>{{ "%.2f"|format(frame.deepfake_score or 0.0) }}</td>
+            <td>
+              {% if frame.deepfake_flag %}
+                <span class="high">⚠️</span>
+              {% else %}
+                <span class="low">✅</span>
+              {% endif %}
+            </td>
           </tr>
           {% endfor %}
         </tbody>

@@ -18,13 +18,17 @@ import mediapipe as mp
 # Audio monitoring
 import sounddevice as sd
 
+# --- Deepfake: Keras/Meso4 ---
+from tensorflow.keras.layers import Input, Dense, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Dropout, LeakyReLU
+from tensorflow.keras.models import Model
+from tensorflow.keras.preprocessing.image import img_to_array
+
 # Globals for audio state
 AUDIO_CHEAT = 0
 SOUND_RMS = 0.0
 
 
 def start_audio_monitoring(rms_threshold=0.015, samplerate=44100, blocksize=1024, device=None):
-    """Start audio RMS monitoring; sets AUDIO_CHEAT and SOUND_RMS with a higher threshold to reduce sensitivity."""
     def audio_callback(indata, frames, time_info, status):
         global AUDIO_CHEAT, SOUND_RMS
         try:
@@ -53,6 +57,93 @@ def start_audio_monitoring(rms_threshold=0.015, samplerate=44100, blocksize=1024
     return t
 
 
+# ---------------------------
+# DeepfakeEngine (Meso4)
+# ---------------------------
+class DeepfakeEngine:
+    def __init__(self,
+                 weights_path: str = "./weights/Meso4_DF.h5",
+                 threshold: float = 0.5,
+                 window: int = 30,
+                 invert_score: bool = False):
+        """
+        threshold: score above which we flag as deepfake (after any inversion).
+        window: rolling window length for median smoothing.
+        invert_score: set True if the loaded weights produce 1=real, 0=fake.
+        """
+        self.model = self._build_meso(weights_path)
+        self.threshold = float(threshold)
+        self.invert = bool(invert_score)
+        self.history = deque(maxlen=int(window))
+
+    def _build_meso(self, wpath: str):
+        x = Input(shape=(256, 256, 3))
+        x1 = Conv2D(8, (3, 3), padding='same', activation='relu')(x)
+        x1 = BatchNormalization()(x1)
+        x1 = MaxPooling2D(pool_size=(2, 2), padding='same')(x1)
+
+        x2 = Conv2D(8, (5, 5), padding='same', activation='relu')(x1)
+        x2 = BatchNormalization()(x2)
+        x2 = MaxPooling2D(pool_size=(2, 2), padding='same')(x2)
+
+        x3 = Conv2D(16, (5, 5), padding='same', activation='relu')(x2)
+        x3 = BatchNormalization()(x3)
+        x3 = MaxPooling2D(pool_size=(2, 2), padding='same')(x3)
+
+        x4 = Conv2D(16, (5, 5), padding='same', activation='relu')(x3)
+        x4 = BatchNormalization()(x4)
+        x4 = MaxPooling2D(pool_size=(4, 4), padding='same')(x4)
+
+        y = Flatten()(x4)
+        y = Dropout(0.5)(y)
+        y = Dense(16)(y)
+        y = LeakyReLU(alpha=0.1)(y)
+        y = Dropout(0.5)(y)
+        y = Dense(1, activation='sigmoid')(y)
+
+        model = Model(inputs=x, outputs=y)
+        model.load_weights(wpath)
+        return model
+
+    def _prep_bgr(self, face_bgr):
+        # Expect BGR crop; convert to RGB and normalize to [0,1]
+        face = cv2.cvtColor(face_bgr, cv2.COLOR_BGR2RGB)
+        face = cv2.resize(face, (256, 256), interpolation=cv2.INTER_AREA)
+        arr = img_to_array(face) / 255.0
+        return np.expand_dims(arr, axis=0)
+
+    def predict_from_crop(self, face_bgr) -> float:
+        x = self._prep_bgr(face_bgr)
+        p = float(self.model.predict(x, verbose=0)[0][0])
+        score = (1.0 - p) if self.invert else p  # ensure higher=“more fake”
+        score = max(0.0, min(1.0, score))
+        self.history.append(score)
+        return score
+
+    def predict_from_bbox(self, frame_bgr, bbox, margin: float = 0.15) -> float:
+        h, w, _ = frame_bgr.shape
+        x1, y1, x2, y2 = [int(v) for v in bbox]
+        # apply margin
+        bw, bh = x2 - x1, y2 - y1
+        mx, my = int(bw * margin), int(bh * margin)
+        x1 = max(0, x1 - mx); y1 = max(0, y1 - my)
+        x2 = min(w - 1, x2 + mx); y2 = min(h - 1, y2 + my)
+        if (x2 - x1) <= 0 or (y2 - y1) <= 0:
+            return 0.0
+        crop = frame_bgr[y1:y2, x1:x2]
+        if crop.size == 0:
+            return 0.0
+        return self.predict_from_crop(crop)
+
+    def median_score(self) -> float:
+        if not self.history:
+            return 0.0
+        return float(np.median(self.history))
+
+    def flag(self) -> bool:
+        return self.median_score() < self.threshold
+
+
 class AIDetectionEngine:
     def __init__(self, use_tracking=False, imgsz=640, conf=0.6, iou=0.65):
         # Start audio monitoring thread with higher RMS threshold
@@ -61,12 +152,12 @@ class AIDetectionEngine:
         # Load YOLOv8n model with stricter thresholds to reduce false positives
         self.model = YOLO("yolov8n.pt")  # auto-downloads weights
         self.imgsz = int(imgsz)
-        self.conf = float(conf)   # stricter than 0.25
-        self.iou = float(iou)     # stricter than 0.45
+        self.conf = float(conf)
+        self.iou = float(iou)
         self.use_tracking = bool(use_tracking)
         self.tracker_cfg = "bytetrack.yaml" if self.use_tracking else None
 
-        # MediaPipe Face Mesh instance with higher confidences and single face
+        # MediaPipe Face Mesh instance
         self.mp_face_mesh = mp.solutions.face_mesh
         self.face_mesh = self.mp_face_mesh.FaceMesh(
             max_num_faces=1,
@@ -74,7 +165,15 @@ class AIDetectionEngine:
             min_tracking_confidence=0.6
         )
 
-        # COCO class IDs of interest
+        # Deepfake engine (configure invert_score if weights output 1=real)
+        self.deepfake = DeepfakeEngine(
+            weights_path="./weights/Meso4_DF.h5",
+            threshold=0.6,       # start conservative; calibrate per environment
+            window=30,
+            invert_score=False    # set True if your weights are 1=real
+        )
+
+        # COCO IDs
         self.COCO_PERSON = 0
         self.COCO_LAPTOP = 63
         self.COCO_CELLPHONE = 67
@@ -90,7 +189,7 @@ class AIDetectionEngine:
         # Temporal smoothing and audio debounce
         self.state_hist = deque(maxlen=10)   # ~1s if ~10 fps checks
         self.audio_strikes = 0
-        self.audio_strikes_needed = 0.5       # ~0.5s at 100ms audio callback
+        self.audio_strikes_needed = 0.5
 
     def _b64_to_bgr(self, image_data: str):
         if "," in image_data:
@@ -101,12 +200,10 @@ class AIDetectionEngine:
         return img
 
     def _estimate_head_pose(self, frame_bgr, bbox):
-        # bbox [x1, y1, x2, y2]
         h, w, _ = frame_bgr.shape
         x1, y1, x2, y2 = [int(max(0, v)) for v in bbox]
         x2 = min(w - 1, x2); y2 = min(h - 1, y2)
 
-        # Ignore tiny boxes (noise)
         if (x2 - x1) * (y2 - y1) < 400:
             return None
 
@@ -119,7 +216,6 @@ class AIDetectionEngine:
         if not res.multi_face_landmarks:
             return None
 
-        # Selected landmarks
         face_ids = [33, 263, 1, 61, 291, 199]
         img_h, img_w, _ = roi.shape
         face_2d, face_3d = [], []
@@ -167,7 +263,7 @@ class AIDetectionEngine:
             if frame is None or frame.size == 0:
                 return {"error": "Invalid image data"}
 
-            # YOLO inference with stricter thresholds
+            # YOLO inference
             if self.use_tracking:
                 results = self.model.track(
                     source=frame, persist=True, verbose=False, tracker=self.tracker_cfg,
@@ -180,7 +276,6 @@ class AIDetectionEngine:
 
             boxes = results.boxes
             if boxes is None or boxes.xyxy is None:
-                # No detections -> neutral, not auto-flagging pose
                 return {
                     "suspicion": 0.0,
                     "detected_class": "none",
@@ -188,6 +283,7 @@ class AIDetectionEngine:
                     "head_pose_flag": False,
                     "audio_flag": False,
                     "deepfake_flag": False,
+                    "deepfake_score": 0.0,
                     "predictions": [],
                     "persons": [],
                     "devices": [],
@@ -204,8 +300,11 @@ class AIDetectionEngine:
             persons = []
             devices = []
             names = getattr(results, "names", {}) or {}
-
             primary_state = None
+
+            # Track highest-confidence person bbox for deepfake
+            best_person = None
+            best_conf = -1.0
 
             for i, (b, c, conf) in enumerate(zip(xyxy, clss, confs)):
                 if c not in self.target_ids:
@@ -213,14 +312,13 @@ class AIDetectionEngine:
                 x1, y1, x2, y2 = map(int, b)
                 label = names.get(int(c), str(int(c)))
 
-                # ignore tiny boxes
                 if (x2 - x1) * (y2 - y1) < 400:
                     continue
 
                 if c == self.COCO_PERSON:
                     pose = self._estimate_head_pose(frame, [x1, y1, x2, y2])
                     if pose is None:
-                        head_state = "Forward"  # neutral if not confident
+                        head_state = "Forward"
                     else:
                         head_state = self._classify_head_state(pose["pitch"], pose["yaw"])
                     if primary_state is None:
@@ -232,6 +330,9 @@ class AIDetectionEngine:
                         "pose": pose,
                         "state": head_state
                     })
+                    if conf > best_conf:
+                        best_conf = conf
+                        best_person = [x1, y1, x2, y2]
                 else:
                     devices.append({
                         "label": label,
@@ -241,7 +342,6 @@ class AIDetectionEngine:
 
             # Temporal smoothing of head pose
             if primary_state is None:
-                # no person detected -> treat as neutral
                 self.state_hist.append("Forward")
             else:
                 self.state_hist.append(primary_state)
@@ -257,17 +357,32 @@ class AIDetectionEngine:
                 self.audio_strikes = max(self.audio_strikes - 1, 0)
             audio_active = (self.audio_strikes >= self.audio_strikes_needed)
 
-            # Suspicion scoring with lower weights and combo gating
+            # Device flag
             device_flag = any(d["label"] in self.suspicious_labels for d in devices)
 
-            class_suspicion = 0.2 if device_flag else 0.0
-            pose_suspicion  = 0.3 if pose_flag else 0.0
-            audio_suspicion = 0.2 if audio_active else 0.0
+            # Deepfake score if a person is present
+            deepfake_score = 0.0
+            deepfake_flag = False
+            if best_person is not None:
+                try:
+                    deepfake_score = self.deepfake.predict_from_bbox(frame, best_person)
+                    deepfake_flag = self.deepfake.flag()
+                except Exception:
+                    deepfake_score = 0.0
+                    deepfake_flag = False
 
-            raw_score = class_suspicion + pose_suspicion + audio_suspicion
-            active_flags = (1 if device_flag else 0) + (1 if pose_flag else 0) + (1 if audio_active else 0)
+            # Suspicion fusion (gate to reduce FPs)
+            class_suspicion  = 0.2 if device_flag else 0.0
+            pose_suspicion   = 0.3 if pose_flag else 0.0
+            audio_suspicion  = 0.2 if audio_active else 0.0
+            deepfake_susp    = 0.3 if deepfake_flag else 0.0
+
+            raw_score = class_suspicion + pose_suspicion + audio_suspicion + deepfake_susp
+            active_flags = (1 if device_flag else 0) + (1 if pose_flag else 0) + (1 if audio_active else 0) + (1 if deepfake_flag else 0)
+
+            # combo bonus if at least two independent signals agree
             if active_flags >= 2:
-                total_suspicion = float(min(1.0, raw_score + 0.3))
+                total_suspicion = float(min(1.0, raw_score + 0.2))
             else:
                 total_suspicion = float(raw_score)
 
@@ -280,7 +395,8 @@ class AIDetectionEngine:
                 "confidence": float(top_conf),
                 "head_pose_flag": bool(pose_flag),
                 "audio_flag": bool(audio_active),
-                "deepfake_flag": False,
+                "deepfake_flag": bool(deepfake_flag),
+                "deepfake_score": float(deepfake_score),
                 "predictions": [],
                 "persons": persons,
                 "devices": devices,

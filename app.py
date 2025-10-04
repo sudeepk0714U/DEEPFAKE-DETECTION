@@ -23,21 +23,21 @@ app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-Session(app)  # server-side session storage [web:3]
+Session(app)  # server-side session storage
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)  # ORM [web:22]
+db = SQLAlchemy(app)  # ORM
 
 # Login manager
 login_manager = LoginManager()
 login_manager.login_view = 'login'
-login_manager.init_app(app)  # Flask-Login [web:3]
+login_manager.init_app(app)  # Flask-Login
 
 # Socket.IO with session integration
 socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True, logger=True, engineio_logger=False)
-# manage_session=True makes Flask session visible in Socket.IO handlers; current_user works post login_user [web:6][web:24]
+# manage_session=True makes Flask session visible in Socket.IO handlers; current_user works post login_user
 
 # =======================
 # Models
@@ -83,7 +83,7 @@ class Report(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))  # Flask-Login user loader [web:3]
+    return User.query.get(int(user_id))  # Flask-Login user loader
 
 # =======================
 # Utilities
@@ -128,7 +128,7 @@ def login():
             next_url = request.args.get('next')
             return redirect(next_url or url_for('dashboard'))
         flash('Invalid credentials')
-    return render_template('login.html')  # uses minimal login.html [web:2]
+    return render_template('login.html')  # uses minimal login.html
 
 @app.route('/register/company', methods=['GET', 'POST'])
 def register_company():
@@ -176,7 +176,7 @@ def logout():
     session.pop('detection_session_id', None)
     session.modified = True
     logout_user()
-    return redirect(url_for('login'))  # return to login page [web:2][web:104]
+    return redirect(url_for('login'))  # return to login page
 
 # =======================
 # Routes: pages
@@ -200,7 +200,6 @@ def company_dashboard():
     # Only show OPEN tests
     tests = Test.query.filter_by(company_id=current_user.company_id, status='open').all()
     return render_template('company_dashboard.html', tests=tests)
-
 
 @app.route('/company/tests/create', methods=['POST'])
 @login_required
@@ -240,7 +239,6 @@ def company_test_reports(test_id):
     user_ids = {r.user_id for r in reports}
     users = {u.id: u for u in User.query.filter(User.id.in_(user_ids)).all()}
     return render_template('company_reports.html', test=t, reports=reports, users=users)
-
 
 @app.route('/join', methods=['GET', 'POST'])
 @login_required
@@ -316,8 +314,10 @@ def report():
             'total_frames': 0, 'suspicious_frames': 0, 'total_suspicion_score': 0.0,
             'max_suspicion': 0.0, 'avg_suspicion': 0.0, 'suspicion_rate': 0.0,
             'head_pose_warnings': 0, 'audio_warnings': 0,
+            'deepfake_warnings': 0,
             'device_detections': {'laptop': 0, 'cell phone': 0},
-            'unique_persons_count': 0, 'frame_data': []
+            'unique_persons_count': 0, 'deepfake_scores_last': [],
+            'frame_data': []
         }
 
     if isinstance(data.get('unique_persons'), set):
@@ -337,7 +337,7 @@ def report():
 # =======================
 @socketio.on('connect')
 def on_connect():
-    # Enforce authentication and test membership for streaming [web:6]
+    # Enforce authentication and test membership for streaming
     if not current_user.is_authenticated:
         return False
     test_id = session.get('active_test_id')
@@ -373,9 +373,11 @@ def on_connect():
         'suspicion_rate': 0.0,
         'head_pose_warnings': 0,
         'audio_warnings': 0,
+        'deepfake_warnings': 0,
         'device_detections': {'laptop': 0, 'cell phone': 0},
         'unique_persons': set(),
         'unique_persons_count': 0,
+        'deepfake_scores': [],
         'frame_data': []
     }
 
@@ -406,6 +408,8 @@ def handle_frame(data):
             sd['head_pose_warnings'] += 1
         if result.get('audio_flag'):
             sd['audio_warnings'] += 1
+        if result.get('deepfake_flag'):
+            sd['deepfake_warnings'] += 1
 
         for device in result.get('devices', []):
             label = device.get('label', '')
@@ -417,13 +421,20 @@ def handle_frame(data):
             if pid is not None:
                 sd['unique_persons'].add(pid)
 
+        df_score = float(result.get('deepfake_score', 0.0))
+        sd['deepfake_scores'].append(df_score)
+        if len(sd['deepfake_scores']) > 100:
+            sd['deepfake_scores'].pop(0)
+
         sd['frame_data'].append({
             'frame_num': sd['total_frames'],
             'timestamp': datetime.now().strftime('%H:%M:%S'),
             'suspicion': suspicion,
             'detected_class': result.get('detected_class', '?'),
             'persons_count': len(result.get('persons', [])),
-            'devices_count': len(result.get('devices', []))
+            'devices_count': len(result.get('devices', [])),
+            'deepfake_score': df_score,
+            'deepfake_flag': bool(result.get('deepfake_flag', False))
         })
         if len(sd['frame_data']) > 100:
             sd['frame_data'].pop(0)
@@ -473,8 +484,10 @@ def handle_stop_detection(payload=None):
             'suspicion_rate': sd['suspicion_rate'],
             'head_pose_warnings': sd['head_pose_warnings'],
             'audio_warnings': sd['audio_warnings'],
+            'deepfake_warnings': sd.get('deepfake_warnings', 0),
             'device_detections': sd['device_detections'],
             'unique_persons_count': len(sd['unique_persons']),
+            'deepfake_scores_last': sd.get('deepfake_scores', [])[-100:],
             'frame_data': sd['frame_data'][-100:]
         }
 
@@ -496,12 +509,11 @@ def handle_stop_detection(payload=None):
         except Exception:
             db.session.rollback()
 
-        # Choose post-test flow:
-        # Option A: Show report, then user may logout manually or via meta-refresh
+        # Option A: Show report page
         report_url = url_for('report', _external=True, report_id=report_id)
         emit('redirect_to_report', {'url': report_url}, room=client_sid)
 
-        # Option B (force immediate logout instead of showing report):
+        # Option B: Immediate logout instead of showing report
         # emit('redirect_to_report', {'url': url_for('logout', _external=True)}, room=client_sid)
 
     else:
