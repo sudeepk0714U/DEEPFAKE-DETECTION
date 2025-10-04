@@ -9,3 +9,5 @@ transformers
 librosa
 flask-sqlalchemy
 flask-login
+tensorflow
+torchvision
