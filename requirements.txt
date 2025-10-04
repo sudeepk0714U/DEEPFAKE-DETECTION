@@ -13,4 +13,4 @@ flask-sqlalchemy
 flask-login
 tensorflow
 torchvision
-flask-sessionS
+flask-session
