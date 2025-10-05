@@ -34,17 +34,17 @@
     .btn-primary:hover{background:var(--primary-600);transform:translateY(-1px)}
     .btn-primary:focus{outline:none;box-shadow:var(--ring)}
     .stats{margin:40px 0;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);border:1px solid rgba(15,23,42,.06);border-radius:var(--radius-lg)}
-    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px}
+    .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;padding:20px}
     .stat{text-align:center;padding:16px;border-radius:12px}
     .stat .num{font-size:28px;font-weight:800}
     .stat .lbl{color:var(--ink-700)}
     .features{padding:48px 0}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
     .card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:24px;transition:.2s transform,.2s box-shadow}
     .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
     .icon{font-size:32px;color:var(--primary);margin-bottom:8px}
     .footer{margin-top:48px;background:rgba(255,255,255,.7);backdrop-filter:blur(10px);border-top:1px solid rgba(15,23,42,.06);padding:18px 0;text-align:center;color:var(--ink-700)}
-    @media (max-width:900px){.grid{grid-template-columns:1fr 1fr}.stats-row{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:900px){.grid{grid-template-columns:1fr 1fr}.stats-row{grid-template-columns:repeat(3,1fr)}}
     @media (max-width:600px){.grid{grid-template-columns:1fr}.hero{padding:56px 0}.hero h1{font-size:32px}.stats-row{grid-template-columns:1fr}}
   </style>
 </head>
@@ -62,7 +62,7 @@
   <section class="hero">
     <div class="container">
       <h1>AI-Powered Proctoring</h1>
-      <p>Real-time monitoring with YOLO detection, head pose analysis, and audio cues</p>
+      <p>Real-time monitoring with YOLO detection, head pose, audio cues, and deepfake detection.</p>
       <a href="/login" class="btn btn-primary"><i class="fas fa-play"></i>Start Assessment</a>
     </div>
   </section>
@@ -73,6 +73,7 @@
         <div class="stat"><div class="num">Real-time</div><div class="lbl">YOLOv8n Detection</div></div>
         <div class="stat"><div class="num">Head</div><div class="lbl">Pose Sensitivity</div></div>
         <div class="stat"><div class="num">Audio</div><div class="lbl">RMS Activity</div></div>
+        <div class="stat"><div class="num">Deepfake</div><div class="lbl">Authenticity Check</div></div>
         <div class="stat"><div class="num">Live</div><div class="lbl">Suspicion Score</div></div>
       </div>
     </div>
@@ -95,6 +96,11 @@
           <div class="icon"><i class="fas fa-microphone"></i></div>
           <h3>Audio Activity</h3>
           <p>Lightweight RMS-based monitoring highlights unusual audio activity during the assessment.</p>
+        </div>
+        <div class="card">
+          <div class="icon"><i class="fas fa-robot"></i></div>
+          <h3>Deepfake Detection</h3>
+          <p>AI-based deepfake analysis ensures the candidate’s live video feed is authentic, preventing spoofing or replay attacks.</p>
         </div>
       </div>
     </div>
